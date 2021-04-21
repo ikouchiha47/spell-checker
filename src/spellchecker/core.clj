@@ -24,7 +24,9 @@
 (defn find-word
   "find word in dictionary"
   ([unique-words word] (-in? unique-words word))
-  ([word] (find-word (unique (words "resources/words.txt")) word)))
+  ([word] (-> (words "resources/words.txt")
+               (unique)
+               (find-word word))))
 
 (defn sum
   ([a b] (+ a b))
