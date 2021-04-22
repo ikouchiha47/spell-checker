@@ -1,5 +1,6 @@
 (ns spellchecker.core
   (:require [clojure.string :as string])
+  (:import (org.apache.commons.text.similarity LevenshteinDistance))
   (:gen-class))
 
 (defn -trim-words
@@ -28,11 +29,26 @@
                (unique)
                (find-word word))))
 
-(defn sum
-  ([a b] (+ a b))
-  ([a b c] (+ c (sum a b))))
+(defn distance
+  "returns distnce between two words"
+  [word query]
+  (let [lv (LevenshteinDistance/getDefaultInstance)]
+   (.apply lv word query)))
+
+(defn correct?
+  "chexk if word is present in dictionary"
+  [word unique-words]
+  (not (empty? (find-word unique-words word))))
+
+(defn nearest-match
+ [word words]
+ (apply min-key (partial distance word) words))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "find closest matching word"
   [& args]
-  (println "Hello, World!"))
+  (let [word (first args)
+        uniq-words (unique(words "resources/words.txt"))]
+  (if (correct? word uniq-words)
+    (println word)
+    (println "Did you mean " (nearest-match word (into [] uniq-words))))))
